@@ -1,6 +1,13 @@
 package internal
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrNotFound = errors.New("Not found")
+)
 
 type Ticket struct {
 	ID          string
@@ -12,17 +19,22 @@ type Ticket struct {
 }
 
 type Storage struct {
-	tickets []Ticket
+	Tickets []Ticket
 }
 
-/*
-// ejemplo 1
-func GetTotalTickets(destination string) (int, error) {}
+// GetTotalTickets devuelve la cantidad total de tickets para un destino específico.
+func (s *Storage) GetTotalTickets(destination string) (int, error) {
+	totalTickets := 0
 
-// ejemplo 2
-func GetMornings(time string) (int, error) {}
+	for _, ticket := range s.Tickets {
+		if ticket.PaisDestino == destination {
+			totalTickets++
+		}
+	}
 
-// ejemplo 3
-func AverageDestination(destination string, total int) (int, error) {}
-
-*/
+	if totalTickets > 0 {
+		return totalTickets, nil
+	} else {
+		return 0, ErrNotFound
+	}
+}
