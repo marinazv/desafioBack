@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -25,12 +26,25 @@ func main() {
 		Tickets: ReadFile(filename),
 	}
 
-	//fmt.Print(storageTickets)
+	fmt.Println("Ingrese un pais de destino")
+	scanner := bufio.NewScanner(os.Stdin)
 
-	totalDestinoChina, _ := storageTickets.GetTotalTickets("China")
-	fmt.Println(totalDestinoChina)
+	// Escanear la próxima línea de texto
+	scanner.Scan()
 
-	fmt.Println(storageTickets.GetCountByPeriod("tarde"))
+	// Obtener el texto ingresado por el usuario
+	pais := scanner.Text()
+
+	totalDestino, _ := storageTickets.GetTotalTickets(pais)
+	fmt.Printf("Para el pais  %s  el total de ticketes fue %v \n", pais, totalDestino)
+
+	fmt.Println("Ingrese el periodo (madrugada,mañana, tarde o noche) para el cual desea conocer la cantidad de pasajeros")
+
+	scanner.Scan()
+	periodo := scanner.Text()
+	totalPeriodo, _ := storageTickets.GetCountByPeriod(periodo)
+
+	fmt.Printf("Para el periodo  %s  el total de viajeros  fue %v", periodo, totalPeriodo)
 
 }
 
