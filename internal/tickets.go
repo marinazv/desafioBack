@@ -2,11 +2,14 @@ package internal
 
 import (
 	"errors"
-	"time"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 var (
-	ErrNotFound = errors.New("Not found")
+	ErrNotFound     = errors.New("Not found")
+	ErrNotFoundTime = errors.New("Not found Time")
 )
 
 type Ticket struct {
@@ -14,7 +17,7 @@ type Ticket struct {
 	Nombre      string
 	Email       string
 	PaisDestino string
-	HoraVuelo   time.Time
+	HoraVuelo   string
 	Precio      string
 }
 
@@ -37,4 +40,52 @@ func (s *Storage) GetTotalTickets(destination string) (int, error) {
 	} else {
 		return 0, ErrNotFound
 	}
+}
+
+// Calcula cuantas personas viajan en madrugada tarde y noche
+func (s *Storage) GetCountByPeriod(time string) (int, error) {
+
+	totalPersonas := 0
+
+	for i := 1; i < len(s.Tickets); i++ {
+		ticket := s.Tickets[i]
+		horaString := strings.Split(string(ticket.HoraVuelo), ":")[0]
+		hora, err := strconv.Atoi(horaString)
+		if err != nil {
+			fmt.Println(err)
+			return 0, err
+		}
+
+		switch {
+		case time == "madrugada":
+			if hora >= 0 && hora < 7 {
+				totalPersonas++
+			}
+
+		case time == "mañana":
+			if hora >= 7 && hora < 13 {
+				totalPersonas++
+			}
+
+		case time == "tarde":
+			if hora >= 13 && hora < 20 {
+				totalPersonas++
+			}
+
+		case time == "noche":
+			if hora >= 20 && hora <= 24 {
+				totalPersonas++
+			}
+
+		default:
+			totalPersonas = 0
+		}
+	}
+
+	if totalPersonas > 0 {
+		return totalPersonas, nil
+	} else {
+		return 0, ErrNotFoundTime
+	}
+
 }
