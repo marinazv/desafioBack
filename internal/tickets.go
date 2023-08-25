@@ -62,7 +62,7 @@ func (s *Storage) GetCountByPeriod(time string) (int, error) {
 				totalPersonas++
 			}
 
-		case time == "mañana":
+		case time == "manana":
 			if hora >= 7 && hora < 13 {
 				totalPersonas++
 			}

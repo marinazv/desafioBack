@@ -49,7 +49,7 @@ func main() {
 	scanner.Scan()
 	destination := scanner.Text()
 
-	fmt.Println("Ingrese el periodo (madrugada, mañana, tarde o noche) para el cual desea conocer la cantidad de pasajeros")
+	fmt.Println("Ingrese el periodo (madrugada, manana, tarde o noche) para el cual desea conocer la cantidad de pasajeros")
 	scanner.Scan()
 	period := scanner.Text()
 
