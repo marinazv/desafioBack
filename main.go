@@ -81,20 +81,20 @@ func main() {
 		canalGetCountByPeriod <- total
 		fmt.Println(" Terminando de Procesar gorutine 2")
 	}()
-	
-		// Goroutine para obtener porcentaje
-		go func() {
-			defer wg.Done()
-			fmt.Println("Procesando gorutine 3")
-			// obtener el porcentaje
-			porcentaje, err := storageTickets.AverageDestination(destination, &storageTickets.Tickets)
-			if err != nil {
-				canalErr <- err
-				return
-			}
-			canalPorcentaje <- porcentaje
-			fmt.Println(" Terminando de Procesar gorutine 3")
-		}()
+
+	// Goroutine para obtener porcentaje
+	go func() {
+		defer wg.Done()
+		fmt.Println("Procesando gorutine 3")
+		// obtener el porcentaje
+		porcentaje, err := storageTickets.AverageDestination(destination, &storageTickets.Tickets)
+		if err != nil {
+			canalErr <- err
+			return
+		}
+		canalPorcentaje <- porcentaje
+		fmt.Println(" Terminando de Procesar gorutine 3")
+	}()
 
 	// asigno a variables lo que traen los canales
 	GetTotalTickets := <-canalGetTotalTickets
