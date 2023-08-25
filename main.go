@@ -16,20 +16,26 @@ const (
 )
 
 func main() {
+	// Crear canales para comunicarnos con las goroutines
+	canalGetTotalTickets := make(chan int)
+	canalGetCountByPeriod := make(chan int)
+	canalErr := make(chan error)
+	// creo la variable para las esperas de los go rutines
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	// Recuperamos los errores para no romper el programa
 	defer func() {
 		if err := recover(); err != nil {
 			log.Fatal(err)
 		}
 	}()
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	// Crear canales para comunicarnos con las goroutines
-	canalGetTotalTickets := make(chan int)
-	canalGetCountByPeriod := make(chan int)
-	canalErr := make(chan error)
+	go func() {
+		defer close(canalErr)
+		for err := range canalErr {
+			log.Println("Error:", err)
+		}
+	}()
 
 	//defino para tener la base de datos en memoria:
 	storageTickets := internal.Storage{
@@ -49,7 +55,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		fmt.Println("Procesando gorutine 1")
-		// Simulando obtener el total de tickets por destino
+		// obtener el total de tickets por destino/
 		total, err := storageTickets.GetTotalTickets(destination)
 		if err != nil {
 			canalErr <- err
@@ -64,6 +70,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		fmt.Println("Procesando gorutine 2")
+		// obtener el total de tickets por destiperiodo
 		total, err := storageTickets.GetCountByPeriod(period)
 		if err != nil {
 			canalErr <- err
@@ -73,29 +80,19 @@ func main() {
 		fmt.Println(" Terminando de Procesar gorutine 2")
 	}()
 
-	// Esperar a que ambas goroutines terminen
-
-	//time.Sleep(10 * time.Second)
-
+	// asigno a variables lo que traen los canales
 	GetTotalTickets := <-canalGetTotalTickets
 	fmt.Printf("la cantidad de tickets para el destino %v es %v\n", destination, GetTotalTickets)
 	CountByPeriod := <-canalGetCountByPeriod
 	fmt.Printf("La canitdad de tickets para el periodo %v  es %v\n", period, CountByPeriod)
 
+	// espero a que todas la go rutines terminen
 	wg.Wait()
 
 	// Cerrar los canales adecuadamente
 	close(canalGetTotalTickets)
 	close(canalGetCountByPeriod)
-	close(canalErr)
 
-}
-
-// Función para obtener entrada del usuario
-func getUserInput() string {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	return scanner.Text()
 }
 
 func ReadFile(filename string) []internal.Ticket {

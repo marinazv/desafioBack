@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	ErrNotFound     = errors.New("Not found")
-	ErrNotFoundTime = errors.New("Not found Time")
+	ErrNotFoundTicket = errors.New("Not found ticket")
+	ErrNotFoundTime   = errors.New("Not found Time")
 )
 
 type Ticket struct {
@@ -38,7 +38,7 @@ func (s *Storage) GetTotalTickets(destination string) (int, error) {
 	if totalTickets > 0 {
 		return totalTickets, nil
 	} else {
-		return 0, ErrNotFound
+		return 0, ErrNotFoundTicket
 	}
 }
 
