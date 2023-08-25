@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrNotFoundTicket = errors.New("Not found ticket")
+	ErrNotFoundTicket = errors.New("Not found ticket for this destination")
 	ErrNotFoundTime   = errors.New("Not found Time")
 )
 
@@ -104,7 +104,7 @@ func (s *Storage) AverageDestination(destination string, Tickets *[]Ticket) (flo
 	}
 
 	if targetCountryTickets == 0 {
-		return 0.0, fmt.Errorf("no se realizaron viajes a ese destino")
+		return 0.0, ErrNotFoundTicket
 	}
 
 	avg := (targetCountryTickets / totalTickets) * 100
