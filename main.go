@@ -83,6 +83,8 @@ func main() {
 	fmt.Printf("La canitdad de tickets para el periodo %v  es %v\n", period, CountByPeriod)
 
 	wg.Wait()
+
+	// Cerrar los canales adecuadamente
 	close(canalGetTotalTickets)
 	close(canalGetCountByPeriod)
 	close(canalErr)
