@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/marinazv/desafioBack/internal"
 )
@@ -22,30 +23,77 @@ func main() {
 		}
 	}()
 
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Crear canales para comunicarnos con las goroutines
+	canalGetTotalTickets := make(chan int)
+	canalGetCountByPeriod := make(chan int)
+	canalErr := make(chan error)
+
+	//defino para tener la base de datos en memoria:
 	storageTickets := internal.Storage{
 		Tickets: ReadFile(filename),
 	}
 
-	fmt.Println("Ingrese un pais de destino")
+	fmt.Println("Ingrese un país de destino")
 	scanner := bufio.NewScanner(os.Stdin)
-
-	// Escanear la próxima línea de texto
 	scanner.Scan()
+	destination := scanner.Text()
 
-	// Obtener el texto ingresado por el usuario
-	pais := scanner.Text()
-
-	totalDestino, _ := storageTickets.GetTotalTickets(pais)
-	fmt.Printf("Para el pais  %s  el total de ticketes fue %v \n", pais, totalDestino)
-
-	fmt.Println("Ingrese el periodo (madrugada,mañana, tarde o noche) para el cual desea conocer la cantidad de pasajeros")
-
+	fmt.Println("Ingrese el periodo (madrugada, mañana, tarde o noche) para el cual desea conocer la cantidad de pasajeros")
 	scanner.Scan()
-	periodo := scanner.Text()
-	totalPeriodo, _ := storageTickets.GetCountByPeriod(periodo)
+	period := scanner.Text()
 
-	fmt.Printf("Para el periodo  %s  el total de viajeros  fue %v", periodo, totalPeriodo)
+	// Goroutine para obtener el total de tickets por destino
+	go func() {
+		defer wg.Done()
+		fmt.Println("Procesando gorutine 1")
+		// Simulando obtener el total de tickets por destino
+		total, err := storageTickets.GetTotalTickets(destination)
+		if err != nil {
+			canalErr <- err
+			return
+		}
 
+		canalGetTotalTickets <- total
+		fmt.Println(" Terminando de Procesar gorutine 1")
+	}()
+
+	// Goroutine para obtener la cantidad de pasajeros por periodo
+	go func() {
+		defer wg.Done()
+		fmt.Println("Procesando gorutine 2")
+		total, err := storageTickets.GetCountByPeriod(period)
+		if err != nil {
+			canalErr <- err
+			return
+		}
+		canalGetCountByPeriod <- total
+		fmt.Println(" Terminando de Procesar gorutine 2")
+	}()
+
+	// Esperar a que ambas goroutines terminen
+
+	//time.Sleep(10 * time.Second)
+
+	GetTotalTickets := <-canalGetTotalTickets
+	fmt.Printf("la cantidad de tickets para el destino %v es %v\n", destination, GetTotalTickets)
+	CountByPeriod := <-canalGetCountByPeriod
+	fmt.Printf("La canitdad de tickets para el periodo %v  es %v\n", period, CountByPeriod)
+
+	wg.Wait()
+	close(canalGetTotalTickets)
+	close(canalGetCountByPeriod)
+	close(canalErr)
+
+}
+
+// Función para obtener entrada del usuario
+func getUserInput() string {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return scanner.Text()
 }
 
 func ReadFile(filename string) []internal.Ticket {
