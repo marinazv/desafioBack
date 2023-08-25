@@ -24,7 +24,7 @@ func main() {
 	canalErr := make(chan error)
 	// creo la variable para las esperas de los go rutines
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 
 	// Recuperamos los errores para no romper el programa
 	defer func() {

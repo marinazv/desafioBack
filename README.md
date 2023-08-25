@@ -1,4 +1,4 @@
-# desafioBack
+# DesafioBack
 
 Realizar un programa que sirva como herramienta para
 calcular diferentes datos estadísticos.
