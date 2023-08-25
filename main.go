@@ -19,6 +19,8 @@ func main() {
 	// Crear canales para comunicarnos con las goroutines
 	canalGetTotalTickets := make(chan int)
 	canalGetCountByPeriod := make(chan int)
+	canalPorcentaje := make(chan float64)
+
 	canalErr := make(chan error)
 	// creo la variable para las esperas de los go rutines
 	var wg sync.WaitGroup
@@ -79,19 +81,35 @@ func main() {
 		canalGetCountByPeriod <- total
 		fmt.Println(" Terminando de Procesar gorutine 2")
 	}()
+	
+		// Goroutine para obtener porcentaje
+		go func() {
+			defer wg.Done()
+			fmt.Println("Procesando gorutine 3")
+			// obtener el porcentaje
+			porcentaje, err := storageTickets.AverageDestination(destination, &storageTickets.Tickets)
+			if err != nil {
+				canalErr <- err
+				return
+			}
+			canalPorcentaje <- porcentaje
+			fmt.Println(" Terminando de Procesar gorutine 3")
+		}()
 
 	// asigno a variables lo que traen los canales
 	GetTotalTickets := <-canalGetTotalTickets
 	fmt.Printf("la cantidad de tickets para el destino %v es %v\n", destination, GetTotalTickets)
 	CountByPeriod := <-canalGetCountByPeriod
 	fmt.Printf("La canitdad de tickets para el periodo %v  es %v\n", period, CountByPeriod)
-
+	AverageDestination := <-canalPorcentaje
+	fmt.Printf("El porcentaje por destino es: %v\n", AverageDestination)
 	// espero a que todas la go rutines terminen
 	wg.Wait()
 
 	// Cerrar los canales adecuadamente
 	close(canalGetTotalTickets)
 	close(canalGetCountByPeriod)
+	close(canalPorcentaje)
 
 }
 
@@ -125,8 +143,4 @@ func ReadFile(filename string) []internal.Ticket {
 
 	return resultado
 
-}
-
-func HolaMundo1() {
-	fmt.Println("hola mundo")
 }

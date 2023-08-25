@@ -89,3 +89,24 @@ func (s *Storage) GetCountByPeriod(time string) (int, error) {
 	}
 
 }
+
+// Requirement 3 -> calcula el porcentaje por destino
+func (s *Storage) AverageDestination(destination string, Tickets *[]Ticket) (float64, error) {
+
+	var totalTickets float64
+	var targetCountryTickets float64
+
+	for _, ticket := range *Tickets {
+		totalTickets++
+		if ticket.PaisDestino == destination {
+			targetCountryTickets++
+		}
+	}
+
+	if targetCountryTickets == 0 {
+		return 0.0, fmt.Errorf("no se realizaron viajes a ese destino")
+	}
+
+	avg := (targetCountryTickets / totalTickets) * 100
+	return avg, nil
+}
